@@ -1,6 +1,12 @@
 ﻿# CMake minimum required version
 cmake_minimum_required (VERSION 3.8)
 
+# Enable Hot Reload for MSVC compilers if supported.
+if (POLICY CMP0141)
+  cmake_policy(SET CMP0141 NEW)
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+endif()
+
 # Set C++ version
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,4 +28,8 @@ file(GLOB_RECURSE sourcefiles "src/*.cpp")
 add_executable (Game ${sourcefiles})
 
 # Link to library
-target_link_libraries(Game raylib winmm.lib gdi32.lib user32 shell32)
+if(MSVC)
+	target_link_libraries(Game "msvc/raylib" winmm.lib gdi32.lib user32 shell32)
+else()
+	target_link_libraries(Game "mingw/libraylib" winmm.lib gdi32.lib user32 shell32)
+endif()
